@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Virtual Labs: Full Adder & IC Trainer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --surface-glass: rgba(255, 255, 255, 0.1);
+            --surface-elevated: rgba(255, 255, 255, 0.95);
+            --text-primary: #1a1a1a;
+            --text-light: #f0f9ff;
+            --border-light: rgba(255, 255, 255, 0.2);
+            --shadow-soft: 0 20px 50px rgba(0, 0, 0, 0.1);
+            /* --- NEW: Define colors for inputs --- */
+            --color-input-a: #f59e0b; /* Amber */
+            --color-input-b: #3b82f6; /* Blue */
+            --color-input-cin: #8b5cf6; /* Purple */
+            --color-output: #22c55e; /* Green */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: 
+                linear-gradient(135deg, rgba(102,126,234,0.7) 0%, rgba(118,75,162,0.7) 50%, rgba(240,147,251,0.7) 100%),
+                url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-blend-mode: overlay;
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: etherealMove 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes etherealMove {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none; /* Add this line */
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-glass);
+            color: white;
+            border: 1px solid var(--border-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 7rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 3rem;
+        }
+
+        .wrap {
+            width: 100%;
+            margin: auto;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .content-box {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .content-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .switch {
+            rx: 12;
+            ry: 12;
+            stroke: white;
+            stroke-width: 3;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .switch.off { fill: #e5e7eb; }
+        .switch.on {
+            fill: var(--color-output); /* Use output green for switch ON state */
+            stroke: var(--color-output);
+            filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.6));
+            animation: switchGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes switchGlow {
+            from { filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.6)); }
+            to { filter: drop-shadow(0 0 25px rgba(34, 197, 94, 0.8)); }
+        }
+
+        .wire {
+            stroke: white;
+            stroke-width: 4;
+            vector-effect: non-scaling-stroke;
+            stroke-linecap: round;
+            transition: stroke 0.4s ease, filter 0.4s ease;
+        }
+
+        /* --- NEW: Wire High State Classes --- */
+        .wire.high-A {
+            stroke: var(--color-input-a);
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6)); /* Amber shadow */
+            animation: wireFlow 1.5s ease-in-out infinite;
+        }
+        .wire.high-B {
+            stroke: var(--color-input-b);
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6)); /* Blue shadow */
+            animation: wireFlow 1.5s ease-in-out infinite;
+        }
+         .wire.high-Cin {
+            stroke: var(--color-input-cin);
+            filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6)); /* Purple shadow */
+            animation: wireFlow 1.5s ease-in-out infinite;
+        }
+        .wire.high-OUT { /* For intermediate and final outputs */
+            stroke: var(--color-output);
+            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)); /* Green shadow */
+            animation: wireFlow 1.5s ease-in-out infinite;
+        }
+        /* Keep original .high for compatibility or specific cases if needed, but prefer specific ones */
+        .wire.high { 
+             stroke: var(--color-output); /* Default high to output color */
+             filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)); 
+             animation: wireFlow 1.5s ease-in-out infinite;
+        }
+
+
+        @keyframes wireFlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .node {
+            fill: white;
+            transition: fill 0.3s ease, filter 0.3s ease;
+        }
+
+        /* --- NEW: Node Active State Classes --- */
+        .node.active-A {
+            fill: var(--color-input-a);
+            filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8)); /* Amber shadow */
+        }
+        .node.active-B {
+            fill: var(--color-input-b);
+            filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.8)); /* Blue shadow */
+        }
+        .node.active-Cin {
+            fill: var(--color-input-cin);
+            filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.8)); /* Purple shadow */
+        }
+         .node.active-OUT { /* For intermediate and final outputs */
+            fill: var(--color-output);
+            filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.8)); /* Green shadow */
+        }
+        /* Keep original .active for compatibility or specific cases */
+        .node.active { 
+             fill: var(--color-output); /* Default active to output color */
+             filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.8));
+        }
+
+
+        .led {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .led.on {
+            fill: var(--color-output);
+            filter: drop-shadow(0 0 25px rgba(34, 197, 94, 1));
+            animation: ledPulse 1.8s ease-in-out infinite alternate;
+        }
+
+        .led.off { fill: #9ca3af; filter: none; }
+
+        @keyframes ledPulse {
+            from { filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8)); }
+            to { filter: drop-shadow(0 0 35px rgba(34, 197, 94, 1)); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 16px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        caption {
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 1rem;
+            background: var(--primary-gradient);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            color: var(--text-light);
+        }
+
+        th {
+            background: rgba(0,0,0,0.2);
+        }
+
+        tbody tr {
+            background: transparent;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tbody tr:last-child { border-bottom: none; }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        tr.active {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%) !important;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        tr.active td {
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .control-panel { min-width: 280px; }
+        .control-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem;
+            background: rgba(0,0,0,0.1);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-control:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0, 0.15);
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-control .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .input-control .toggle-switch.active {
+            background: var(--success-gradient);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .input-control .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-control .toggle-switch.active::after { transform: translateX(30px); }
+
+        .status-display {
+            background: rgba(0,0,0,0.1);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-row:last-child { margin-bottom: 0; }
+        .status-value { font-weight: 800; color: var(--color-output); } /* Use output green */
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-light);
+            margin: 10% auto;
+            padding: 2.5rem;
+            border-radius: 24px;
+            width: 80%;
+            max-width: 600px;
+            color: var(--text-light);
+            position: relative;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .modal-content.modal-lg {
+            max-width: 900px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .modal-content p, .modal-content li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .modal-content ul { padding-left: 20px; }
+
+        .close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-btn:hover, .close-btn:focus { color: white; }
+
+        /* Quiz Styles */
+        /* (Quiz styles remain unchanged) */
+        .quiz-container { width: 100%; }
+        .quiz-question { font-size: 1.2rem; margin-bottom: 1.5rem; }
+        .quiz-options { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+        .quiz-option { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-light); padding: 1rem; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; }
+        .quiz-option:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+        .quiz-option.correct { background: rgba(34, 197, 94, 0.5); border-color: #22c55e; }
+        .quiz-option.incorrect { background: rgba(239, 68, 68, 0.5); border-color: #ef4444; }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+        .quiz-score { text-align: center; font-size: 1.5rem; font-weight: bold; margin-top: 2rem; }
+
+
+        @media (max-width: 1200px) {
+            .main-content-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem; }
+            .container { padding: 8rem 1rem 2rem; } /* Adjusted padding top */
+            .content-box { padding: 1.5rem; }
+            .title { font-size: 2rem; }
+            .modal-content { width: 90%; margin: 20% auto; }
+            h1 { font-size: 2.5rem; } /* Adjust h1 size */
+            .subtitle { font-size: 1rem; }
+        }
+    </style>
+
+    <!-- STYLES FOR IC TRAINER KIT -->
+    <!-- (IC Trainer styles remain unchanged) -->
+    <style>
+     /* --- IC Trainer styles omitted for brevity --- */
+      .ic-trainer-body-wrapper { padding: 20px; font-family: Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; background: transparent; }
+      .ic-trainer-body-wrapper .title { font-size: 2.5rem; color: white; text-align: center; margin-bottom: 2rem; font-weight: 700; }
+      .breadboard-container { background: #e8e8e8; border: 3px solid #ccc; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; }
+      .trainer-section { background: #2a2a2a; border-radius: 6px; padding: 15px; margin-bottom: 15px; border: 2px solid #444; position: relative; }
+      .led-section { display: flex; justify-content: space-around; align-items: center; gap: 10px; }
+      .led-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; padding-bottom: 15px; }
+      .led-unit .led { width: 20px; height: 20px; border-radius: 50%; background: #333; border: 2px solid #666; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+      .led-unit .led.on { background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff3333, #cc0000); border-color: #ff6b6b; box-shadow: 0 0 15px rgba(255, 107, 107, 0.8), inset 0 2px 4px rgba(255,255,255,0.2); }
+      .led-label { color: #fff; font-size: 12px; font-weight: bold; }
+      .switch-section { display: flex; justify-content: space-around; align-items: center; gap: 10px; }
+      .switch-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; padding-top: 15px; }
+      .switch-unit .toggle-switch { width: 40px; height: 20px; background: #555; border-radius: 10px; position: relative; cursor: pointer; border: 2px solid #777; transition: all 0.3s ease; }
+      .switch-unit .toggle-switch.on { background: #4ecdc4; border-color: #4ecdc4; }
+      .toggle-slider { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: white; border-radius: 50%; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+      .switch-unit .toggle-switch.on .toggle-slider { transform: translateX(18px); }
+      .switch-label { color: #fff; font-size: 12px; font-weight: bold; }
+      .power-section { display: flex; justify-content: center; gap: 40px; align-items: center; }
+      .power-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; padding-bottom: 20px; }
+      .power-terminal { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid #777; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+      .vcc-terminal { background: linear-gradient(145deg, #ff6b6b, #ff4444); color: white; border-color: #ff4444; }
+      .gnd-terminal { background: linear-gradient(145deg, #4444ff, #3333cc); color: white; border-color: #4444ff; }
+      .power-terminal:hover { transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+      .power-label { color: #fff; font-size: 14px; font-weight: bold; }
+      .connection-terminal { width: 8px; height: 8px; border-radius: 50%; background: #888; border: 1px solid #aaa; cursor: pointer; transition: all 0.2s ease; position: absolute; }
+      .connection-terminal:hover { background: #bbb; transform: scale(1.3); box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+      .connection-terminal.selected { background: #ff6b6b; box-shadow: 0 0 8px rgba(255, 107, 107, 0.8); }
+      .connection-terminal.connected { background: #4ecdc4; box-shadow: 0 0 6px rgba(78, 205, 196, 0.8); }
+      .led-terminal { bottom: -5px; left: 50%; transform: translateX(-50%); }
+      .switch-terminal { top: -5px; left: 50%; transform: translateX(-50%); }
+      .power-terminal-point { bottom: -5px; left: 50%; transform: translateX(-50%); }
+      .breadboard { display: grid; gap: 2px; background: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd; position: relative; margin-top: 10px; }
+      .power-rails, .main-grid, .column-labels { display: grid; grid-template-columns: repeat(60, 12px); gap: 2px; }
+      .power-rails { margin-bottom: 10px; }
+      .main-grid { grid-template-rows: repeat(5, 1fr); margin: 3px 0; position: relative; }
+      .column-labels { margin-bottom: 5px; text-align: center; font-size: 10px; color: #999; }
+      .tie-point { width: 12px; height: 12px; border-radius: 50%; background: #333; cursor: pointer; transition: all 0.2s ease; border: 1px solid #555; position: relative; }
+      .tie-point:hover { background: #555; transform: scale(1.2); }
+      .tie-point.selected { background: #ff6b6b; box-shadow: 0 0 8px rgba(255, 107, 107, 0.6); }
+      .tie-point.connected { background: #4ecdc4; box-shadow: 0 0 6px rgba(78, 205, 196, 0.5); }
+      .power-positive { background: #ff4444 !important; }
+      .power-negative { background: #4444ff !important; }
+      .power-positive:hover { background: #ff6666 !important; }
+      .power-negative:hover { background: #6666ff !important; }
+      .divider { grid-column: 1 / -1; height: 14px; background: #e0e0e0; margin: 4px 0; }
+      .row-labels { position: absolute; left: -25px; top: 0; height: 100%; display: flex; flex-direction: column; justify-content: space-around; font-size: 12px; color: #666; font-weight: bold; width: 15px; }
+      .row-labels div { height: 20%; display: flex; align-items: center; justify-content: center; }
+      .controls { margin-top: 20px; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+      .controls .btn { background: #4ecdc4; color: white; border: none; padding: 8px 16px; margin: 0 5px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+      .controls .btn:hover { background: #45b7aa; }
+      .ic-component { position: absolute; background: #555; color: #fff; border-radius: 4px; width: 96px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; box-shadow: 0 2px 3px rgba(0,0,0,0.3); z-index: 100; user-select: none; cursor: default; transform: translateY(-50%); }
+      .ic-label { font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; font-weight: bold; }
+      .ic-notch { position: absolute; left: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 12px; background: #555; border: 1px solid #333; border-right: none; border-radius: 10px 0 0 10px; }
+      .ic-pins-visual { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+      .ic-pin-visual { position: absolute; width: 4px; height: 12px; background: #aaa; border-radius: 1px; }
+      .ic-pin-visual.top { top: -11px; }
+      .ic-pin-visual.bottom { bottom: -11px; }
+      .ic-pin-label { position: absolute; font-size: 7px; color: #ccc; font-family: monospace; transform: translateX(-50%); }
+      .ic-pin-label.pin-label-top-row { top: 3px; }
+      .ic-pin-label.pin-label-bottom-row { bottom: 3px; }
+      .breadboard-container .status { margin-top: 10px; padding: 10px; background: #f8f8f8; border-radius: 4px; font-size: 12px; color: #666; min-height: 20px; }
+      .power-indicators { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; }
+      .power-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #666; }
+      .power-dot { width: 8px; height: 8px; border-radius: 50%; }
+      .positive-dot { background: #ff4444; }
+      .negative-dot { background: #4444ff; }
+      .section-title { color: #fff; font-size: 14px; font-weight: bold; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+      .wire-path { stroke: #4ecdc4; stroke-width: 3; fill: none; filter: drop-shadow(0 0 3px rgba(78, 205, 196, 0.6)); }
+      .wire-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+      .vcc-wire { stroke: #ff4444; filter: drop-shadow(0 0 4px rgba(255, 68, 68, 0.8)); }
+      .gnd-wire { stroke: #4444ff; filter: drop-shadow(0 0 4px rgba(68, 68, 255, 0.8)); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <span>Digital Logic Design Lab</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" id="preLabBtn">
+                    <i class="fas fa-book-open"></i> Pre Lab
+                </button>
+                <button class="btn btn-secondary" id="postLabBtn">
+                    <i class="fas fa-clipboard-check"></i> Post Lab
+                </button>
+                <button class="btn btn-primary" id="theoryBtn">
+                    <i class="fas fa-lightbulb"></i> Theory
+                </button>
+                <!-- REMOVED Feedback button -->
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1> Design of Full Adder Circuit </h1>
+        <p class="subtitle">Professional Digital Circuit Simulation Platform</p>
+        <div class="main-content-grid">
+            
+            <div class="content-box">
+                <!-- ADDED title -->
+                 <h3 class="control-title" style="justify-content: center; margin-bottom: 1rem;"><i class="fas fa-project-diagram"></i> Logic Diagram of Full Adder</h3>
+                <svg id="circuit" viewBox="0 0 800 400" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" aria-label="Interactive Full Adder">
+                    <text x="24" y="52" font-size="20" font-weight="bold" fill="white">A</text>
+                    <rect id="swA" class="switch off" x="60" y="30" width="60" height="30" tabindex="0"/>
+                    
+                    <text x="24" y="152" font-size="20" font-weight="bold" fill="white">B</text>
+                    <rect id="swB" class="switch off" x="60" y="130" width="60" height="30" tabindex="0"/>
+
+                    <text x="24" y="252" font-size="20" font-weight="bold" fill="white">Cin</text>
+                    <rect id="swCin" class="switch off" x="60" y="230" width="60" height="30" tabindex="0"/>
+
+                    <line id="wireA1" class="wire" x1="120" y1="45" x2="160" y2="45"/>
+                    <line id="wireB1" class="wire" x1="120" y1="145" x2="160" y2="145"/>
+                    <line id="wireCin1" class="wire" x1="120" y1="245" x2="160" y2="245"/>
+                    <line class="wire" x1="160" y1="45" x2="160" y2="300" /> <!-- A vertical trunk -->
+                    <line class="wire" x1="160" y1="145" x2="160" y2="300" /> <!-- B vertical trunk (shorter) -->
+                     <line class="wire" x1="160" y1="245" x2="160" y2="245" /> <!-- Cin vertical trunk (needs extension in logic) -->
+                    
+                    <circle id="nodeA" class="node" cx="160" cy="45" r="4"/>
+                    <circle id="nodeB" class="node" cx="160" cy="145" r="4"/>
+                    <circle id="nodeCin" class="node" cx="160" cy="245" r="4"/>
+
+                    <!-- First XOR -->
+                    <line id="wireA_xor1" class="wire" x1="160" y1="80" x2="220" y2="80"/>
+                    <line id="wireB_xor1" class="wire" x1="160" y1="110" x2="220" y2="110"/>
+                    <line class="wire" x1="160" y1="45" x2="160" y2="80" /> <!-- Tap A for XOR1 -->
+                    <line class="wire" x1="160" y1="145" x2="160" y2="110" /> <!-- Tap B for XOR1 -->
+                    <g transform="translate(212, 62.5)">
+                        <path d="M -10 0 Q 42 35 -10 70" fill="none" stroke="white" stroke-width="3"/>
+                        <path d="M 0 0 Q 52 35 0 70 Q 150 35 0 0 Z" fill="rgba(255,255,255,0.8)" stroke="white" stroke-width="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.1))"/>
+                        <text x="40" y="40" font-size="14" text-anchor="middle" font-weight="bold" fill="#374151">XOR</text>
+                    </g>
+                    
+                    <!-- First AND -->
+                    <line id="wireA_and1" class="wire" x1="160" y1="280" x2="240" y2="280"/>
+                    <line id="wireB_and1" class="wire" x1="160" y1="300" x2="240" y2="300"/>
+                    <!-- Taps already exist from vertical trunks -->
+                    <g transform="translate(240, 265)">
+                        <path d="M 0 0 H 40 A 30 30 0 0 1 40 60 H 0 V 0 Z" fill="rgba(255,255,255,0.8)" stroke="white" stroke-width="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.1))"/>
+                        <text x="25" y="35" font-size="14" text-anchor="middle" font-weight="bold" fill="#374151">AND</text>
+                    </g>
+                    
+                    <!-- XOR1 output wire -->
+                    <line id="wireX1_out" class="wire" x1="286" y1="100" x2="350" y2="100"/>
+                    <circle id="nodeX1" class="node" cx="350" cy="100" r="4"/>
+                    <line class="wire" x1="350" y1="100" x2="350" y2="220"/> <!-- Vertical trunk for XOR1 output -->
+                    
+                     <!-- Second XOR -->
+                    <line id="wireX1_xor2" class="wire" x1="350" y1="150" x2="410" y2="150"/>
+                    <line id="wireCin_xor2" class="wire" x1="160" y1="180" x2="410" y2="180"/>
+                    <line class="wire" x1="350" y1="100" x2="350" y2="150"/> <!-- Tap XOR1_out for XOR2 -->
+                    <line class="wire" x1="160" y1="245" x2="160" y2="180"/> <!-- Tap Cin for XOR2 -->
+                    <g transform="translate(402, 132.5)">
+                        <path d="M -10 0 Q 42 35 -10 70" fill="none" stroke="white" stroke-width="3"/>
+                        <path d="M 0 0 Q 52 35 0 70 Q 150 35 0 0 Z" fill="rgba(255,255,255,0.8)" stroke="white" stroke-width="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.1))"/>
+                        <text x="40" y="40" font-size="14" text-anchor="middle" font-weight="bold" fill="#374151">XOR</text>
+                    </g>
+                    
+                    <!-- Second AND -->
+                    <line id="wireX1_and2" class="wire" x1="350" y1="220" x2="430" y2="220"/>
+                    <line id="wireCin_and2" class="wire" x1="160" y1="245" x2="430" y2="245"/>
+                     <!-- Tap XOR1_out already exists -->
+                     <!-- Tap Cin already exists -->
+                    <g transform="translate(430, 205)">
+                        <path d="M 0 0 H 40 A 30 30 0 0 1 40 60 H 0 V 0 Z" fill="rgba(255,255,255,0.8)" stroke="white" stroke-width="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.1))"/>
+                        <text x="25" y="35" font-size="14" text-anchor="middle" font-weight="bold" fill="#374151">AND</text>
+                    </g>
+                    
+                    <!-- OR Gate -->
+                    <line id="wireC1_or" class="wire" x1="310" y1="295" x2="520" y2="295"/> <!-- From AND1 -->
+                    <line id="wireC2_or" class="wire" x1="500" y1="235" x2="520" y2="235"/> <!-- From AND2 -->
+                    <g transform="translate(520,229)">
+                        <path d="M 0 0 Q 52 35 0 70 Q 155 39 0 0 Z" transform="scale(1) translate(0, 0)" fill="rgba(255,255,255,0.8)" stroke="white" stroke-width="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.1)"/>
+                        <text x="38" y="38" font-size="14" text-anchor="middle" font-weight="bold" fill="#374151">OR</text>
+                    </g>
+
+                    <!-- Outputs -->
+                    <line id="wireSum" class="wire" x1="476" y1="170" x2="620" y2="170"/> <!-- From XOR2 -->
+                    <circle id="ledSum" class="led off" cx="635" cy="170" r="15"/>
+                    <text x="660" y="176" font-size="16" font-weight="bold" fill="white">Sum</text>
+                    
+                    <line id="wireCout" class="wire" x1="595" y1="265" x2="620" y2="265"/> <!-- From OR -->
+                    <circle id="ledCarry" class="led off" cx="635" cy="265" r="15"/>
+                    <text x="660" y="271" font-size="16" font-weight="bold" fill="white">Carry-Out</text>
+                </svg>
+            </div>
+
+            <div class="content-box">
+                <table id="tt">
+                    <caption><i class="fas fa-table"></i> Truth Table</caption>
+                    <thead>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>Cin</th>
+                            <th>Sum</th>
+                            <th>Cout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-a="0" data-b="0" data-cin="0"><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                        <tr data-a="0" data-b="0" data-cin="1"><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+                        <tr data-a="0" data-b="1" data-cin="0"><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                        <tr data-a="0" data-b="1" data-cin="1"><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+                        <tr data-a="1" data-b="0" data-cin="0"><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+                        <tr data-a="1" data-b="0" data-cin="1"><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                        <tr data-a="1" data-b="1" data-cin="0"><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                        <tr data-a="1" data-b="1" data-cin="1"><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-box">
+                <div class="control-panel">
+                    <h3 class="control-title"><i class="fas fa-sliders-h"></i> Input Controls</h3>
+                    <div class="input-control">
+                        <div class="input-label"><i class="fas fa-toggle-off"></i> Input A</div>
+                        <div class="toggle-switch" id="toggleA" onclick="toggleA()"></div>
+                    </div>
+                    <div class="input-control">
+                        <div class="input-label"><i class="fas fa-toggle-off"></i> Input B</div>
+                        <div class="toggle-switch" id="toggleB" onclick="toggleB()"></div>
+                    </div>
+                    <div class="input-control">
+                        <div class="input-label"><i class="fas fa-toggle-off"></i> Input Cin</div>
+                        <div class="toggle-switch" id="toggleCin" onclick="toggleCin()"></div>
+                    </div>
+                    <div class="status-display">
+                        <div class="status-row"><span>Input A:</span><span class="status-value" id="statusA">0</span></div>
+                        <div class="status-row"><span>Input B:</span><span class="status-value" id="statusB">0</span></div>
+                        <div class="status-row"><span>Input Cin:</span><span class="status-value" id="statusCin">0</span></div>
+                        <div class="status-row"><span>Sum:</span><span class="status-value" id="statusSum">0</span></div>
+                        <div class="status-row"><span>Carry:</span><span class="status-value" id="statusCarry">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="preLabModal" class="modal">
+         <div class="modal-content">
+             <span class="close-btn">&times;</span>
+             <h2><i class="fas fa-book-open"></i> Pre Lab Quiz</h2>
+             <div id="preLabQuizContainer" class="quiz-container"></div>
+         </div>
+     </div>
+     <div id="postLabModal" class="modal">
+         <div class="modal-content">
+             <span class="close-btn">&times;</span>
+             <h2><i class="fas fa-clipboard-check"></i> Post Lab Quiz</h2>
+             <div id="postLabQuizContainer" class="quiz-container"></div>
+         </div>
+     </div>
+     <div id="theoryModal" class="modal">
+         <div class="modal-content modal-lg">
+             <span class="close-btn">&times;</span>
+             <h2><i class="fas fa-lightbulb"></i> Theory</h2>
+             <!-- Ensure iframe source is correct and allows embedding -->
+             <iframe src="https://drive.google.com/file/d/1NR6oSy5H5_4hJL9ScnXJv15k8sWZfhOF/preview" width="100%" height="95%" allow="autoplay" style="border:none;"></iframe>
+         </div>
+     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        (() => {
+            let A = 0, B = 0, Cin = 0;
+            const $ = id => document.getElementById(id);
+
+            // --- UPDATED Wire mapping ---
+            const wires = {
+                A: ["wireA1", "wireA_xor1", "wireA_and1"],
+                B: ["wireB1", "wireB_xor1", "wireB_and1"],
+                Cin: ["wireCin1", "wireCin_xor2", "wireCin_and2"],
+                X1: ["wireX1_out", "wireX1_xor2", "wireX1_and2"], // Output of first XOR (A^B)
+                C1: ["wireC1_or"], // Output of first AND (A&B)
+                C2: ["wireC2_or"], // Output of second AND (Cin & (A^B))
+                SUM: ["wireSum"],  // Output of second XOR
+                COUT: ["wireCout"] // Output of OR gate
+            };
+
+            // --- UPDATED setWireHigh to accept class ---
+            function setWireHigh(ids, high, highClass = 'high-OUT'){ // Default to output green
+                ids.forEach(id => {
+                    const el = $(id);
+                    if (el) {
+                         // Remove all potential high classes first
+                        el.classList.remove('high', 'high-A', 'high-B', 'high-Cin', 'high-OUT');
+                        if (!!high) {
+                            el.classList.add(highClass); // Add the specified class
+                        }
+                    }
+                });
+            }
+
+            // --- UPDATED setNodeActive to accept class ---
+            function setNodeActive(nodeId, active, activeClass = 'active-OUT') { // Default to output green
+                const el = $(nodeId); 
+                if (el) {
+                    // Remove all potential active classes first
+                    el.classList.remove('active', 'active-A', 'active-B', 'active-Cin', 'active-OUT');
+                    if (active) {
+                        el.classList.add(activeClass); // Add the specified class
+                    }
+                }
+            }
+
+            function paintSwitches(){
+                $('swA').classList.toggle('on', A===1); $('swA').classList.toggle('off', A===0);
+                $('swB').classList.toggle('on', B===1); $('swB').classList.toggle('off', B===0);
+                $('swCin').classList.toggle('on', Cin===1); $('swCin').classList.toggle('off', Cin===0);
+                
+                $('toggleA').classList.toggle('active', A===1);
+                $('toggleB').classList.toggle('active', B===1);
+                $('toggleCin').classList.toggle('active', Cin===1);
+
+                // --- UPDATED calls with specific classes ---
+                setWireHigh(wires.A, A, 'high-A');
+                setWireHigh(wires.B, B, 'high-B');
+                setWireHigh(wires.Cin, Cin, 'high-Cin');
+                setNodeActive('nodeA', A, 'active-A');
+                setNodeActive('nodeB', B, 'active-B');
+                setNodeActive('nodeCin', Cin, 'active-Cin');
+            }
+
+            function paintOutputs(sum, carry){
+                const xor1_out = A ^ B;
+                const and1_out = A & B;
+                const and2_out = xor1_out & Cin;
+
+                // --- UPDATED calls with output class ---
+                setWireHigh(wires.X1, xor1_out, 'high-OUT');
+                setNodeActive('nodeX1', xor1_out, 'active-OUT');
+                setWireHigh(wires.C1, and1_out, 'high-OUT');
+                setWireHigh(wires.C2, and2_out, 'high-OUT');
+                
+                $('ledSum').classList.toggle('on', !!sum);
+                $('ledSum').classList.toggle('off', !sum);
+                $('ledCarry').classList.toggle('on', !!carry);
+                $('ledCarry').classList.toggle('off', !carry);
+                
+                setWireHigh(wires.SUM, sum, 'high-OUT');
+                setWireHigh(wires.COUT, carry, 'high-OUT');
+            }
+
+            function highlightTruthTable(){
+                document.querySelectorAll('#tt tbody tr').forEach(r=>{
+                    r.classList.toggle('active', +r.dataset.a===A && +r.dataset.b===B && +r.dataset.cin===Cin);
+                });
+            }
+
+            function updateStatusDisplay() {
+                $('statusA').textContent = A;
+                $('statusB').textContent = B;
+                $('statusCin').textContent = Cin;
+                $('statusSum').textContent = A ^ B ^ Cin;
+                $('statusCarry').textContent = (A & B) | (Cin & (A ^ B));
+            }
+
+            function update(){
+                paintSwitches();
+                const sum = A ^ B ^ Cin;
+                const carry = (A & B) | (Cin & (A ^ B));
+                paintOutputs(sum, carry);
+                highlightTruthTable();
+                updateStatusDisplay();
+            }
+
+            window.toggleA = function(){ A = A ? 0 : 1; update(); }
+            window.toggleB = function(){ B = B ? 0 : 1; update(); }
+            window.toggleCin = function(){ Cin = Cin ? 0 : 1; update(); }
+
+            $('swA').addEventListener('click', window.toggleA);
+            $('swB').addEventListener('click', window.toggleB);
+            $('swCin').addEventListener('click', window.toggleCin);
+            
+            ['swA','swB', 'swCin'].forEach(id=>{
+                const el = $(id);
+                if (el) {
+                    el.addEventListener('keydown', e=>{
+                        if(e.key===' '||e.key==='Enter'){ 
+                            e.preventDefault(); 
+                            if(id==='swA') window.toggleA();
+                            else if(id==='swB') window.toggleB();
+                            else window.toggleCin();
+                        }
+                    });
+                }
+            });
+            
+            // Modal Logic 
+            const preLabModal = $('preLabModal');
+            const postLabModal = $('postLabModal');
+            const theoryModal = $('theoryModal');
+            const modals = [preLabModal, postLabModal, theoryModal].filter(m => m != null);
+
+            $('preLabBtn').onclick = () => { preLabModal.style.display = "block"; startQuiz('pre'); }
+            $('postLabBtn').onclick = () => { postLabModal.style.display = "block"; startQuiz('post'); }
+            $('theoryBtn').onclick = () => theoryModal.style.display = "block";
+
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.onclick = () => modals.forEach(modal => { if(modal) modal.style.display = "none"; });
+            });
+
+            window.addEventListener('click', (event) => {
+                if (modals.includes(event.target)) {
+                    modals.forEach(modal => { if(modal) modal.style.display = "none"; });
+                }
+            });
+
+            update();
+
+            // --- QUIZ LOGIC ---
+            const preLabQuestions = [
+                { question: "A full adder adds how many binary digits?", options: ["One", "Two", "Three", "Four"], answer: "Three" },
+                { question: "How many outputs does a full adder have?", options: ["One", "Two", "Three", "Four"], answer: "Two" },
+                { question: "What are the outputs of a full adder?", options: ["Sum and Remainder", "Difference and Borrow", "Sum and Carry-Out", "Quotient and Carry"], answer: "Sum and Carry-Out" },
+                { question: "A full adder can be constructed from:", options: ["Two AND gates", "Two half adders and an OR gate", "Two half adders and an AND gate", "One XOR and one AND gate"], answer: "Two half adders and an OR gate" },
+                { question: "The Boolean expression for the Sum of a full adder is:", options: ["A + B + Cin", "A ⊕ B ⊕ Cin", "A · B · Cin", "A + (B ⊕ Cin)"], answer: "A ⊕ B ⊕ Cin" },
+                { question: "The purpose of the 'Carry-In' (Cin) input is to:", options: ["Act as the final sum", "Subtract from the total", "Accept the carry from a less significant bit stage", "Always be 1"], answer: "Accept the carry from a less significant bit stage" },
+                { question: "If A=1, B=0, Cin=1, what is the Sum output?", options: ["0", "1", "2", "3"], answer: "0" },
+                { question: "If A=1, B=0, Cin=1, what is the Carry-Out (Cout)?", options: ["0", "1", "2", "3"], answer: "1" },
+                { question: "Which IC can be used for the XOR operation in a full adder?", options: ["7408 (AND)", "7432 (OR)", "7486 (XOR)", "7404 (NOT)"], answer: "7486 (XOR)" },
+                { question: "Full adders are essential for building:", options: ["Simple logic gates", "Multi-bit ripple-carry adders", "Memory units", "Clocks"], answer: "Multi-bit ripple-carry adders" }
+            ];
+
+            const postLabQuestions = [
+                { question: "For inputs A=1, B=1, Cin=1, the outputs are:", options: ["Sum=0, Cout=0", "Sum=1, Cout=0", "Sum=0, Cout=1", "Sum=1, Cout=1"], answer: "Sum=1, Cout=1" },
+                { question: "The Carry-Out (Cout) of a full adder is 1 if:", options: ["Only one input is 1", "Any two or all three inputs are 1", "All inputs are 0", "The inputs are alternating"], answer: "Any two or all three inputs are 1" },
+                { question: "The Boolean expression for Carry-Out (Cout) is:", options: ["A ⊕ B ⊕ Cin", "(A·B) + Cin", "(A⊕B)·Cin + A·B", "A+B+Cin"], answer: "(A⊕B)·Cin + A·B" },
+                { question: "If Sum=0 and Cout=1, which of these could be the inputs?", options: ["A=0, B=0, Cin=0", "A=0, B=1, Cin=0", "A=1, B=1, Cin=0", "A=1, B=0, Cin=0"], answer: "A=1, B=1, Cin=0" },
+                { question: "A 4-bit parallel adder requires how many full adders?", options: ["1", "2", "3", "4"], answer: "4" },
+                { question: "In a multi-bit adder, the Cout of one full adder is connected to:", options: ["The final Sum output", "The Cin of the next more significant full adder", "The ground", "Its own Cin input"], answer: "The Cin of the next more significant full adder" },
+                { question: "If you have only NAND gates, can you build a full adder?", options: ["Yes", "No", "Only if you also have a NOT gate", "Only for the Sum part"], answer: "Yes" },
+                { question: "Which type of circuit is a full adder?", options: ["Sequential", "Combinational", "Asynchronous", "Synchronous"], answer: "Combinational" },
+                { question: "For inputs A=0, B=1, Cin=1, the outputs are:", options: ["Sum=0, Cout=1", "Sum=1, Cout=0", "Sum=0, Cout=0", "Sum=1, Cout=1"], answer: "Sum=0, Cout=1" },
+                { question: "What is the primary advantage of a full adder over a half adder?", options: ["It is faster", "It uses fewer gates", "It can handle a carry-in from a previous stage", "It can perform subtraction"], answer: "It can handle a carry-in from a previous stage" }
+            ];
+             let currentQuiz = {};
+             function startQuiz(quizType) {
+                 currentQuiz = {
+                     type: quizType,
+                     questions: quizType === 'pre' ? preLabQuestions : postLabQuestions,
+                     container: quizType === 'pre' ? $('preLabQuizContainer') : $('postLabQuizContainer'),
+                     currentIndex: 0,
+                     score: 0,
+                 };
+                 showQuestion();
+             }
+             function showQuestion() {
+                 const questionData = currentQuiz.questions[currentQuiz.currentIndex];
+                 if (!currentQuiz.container) return; // Added check for container
+                 currentQuiz.container.innerHTML = `
+                     <div class="quiz-question">${currentQuiz.currentIndex + 1}. ${questionData.question}</div>
+                     <ul class="quiz-options" id="quizOptions">
+                         ${questionData.options.map(option => `<li class="quiz-option">${option}</li>`).join('')}
+                     </ul>
+                 `;
+                 document.querySelectorAll('.quiz-option').forEach(option => {
+                     option.addEventListener('click', selectAnswer);
+                 });
+             }
+             function selectAnswer(e) {
+                 const selectedOption = e.target;
+                 const correctAnswer = currentQuiz.questions[currentQuiz.currentIndex].answer;
+                 
+                 const options = document.querySelectorAll('.quiz-option');
+                 options.forEach(opt => opt.classList.add('disabled'));
+
+                 if (selectedOption.textContent === correctAnswer) {
+                     selectedOption.classList.add('correct');
+                     currentQuiz.score++;
+                 } else {
+                     selectedOption.classList.add('incorrect');
+                     options.forEach(opt => {
+                         if (opt.textContent === correctAnswer) {
+                             opt.classList.add('correct');
+                         }
+                     });
+                 }
+
+                 setTimeout(() => {
+                     currentQuiz.currentIndex++;
+                     if (currentQuiz.currentIndex < currentQuiz.questions.length) {
+                         showQuestion();
+                     } else {
+                         showScore();
+                     }
+                 }, 1500);
+             }
+             function showScore() {
+                  if (!currentQuiz.container) return; // Added check for container
+                 currentQuiz.container.innerHTML = `
+                     <div class="quiz-score">
+                         You scored ${currentQuiz.score} out of ${currentQuiz.questions.length}!
+                     </div>
+                 `;
+             }
+             // Make quiz functions global
+             window.startQuiz = startQuiz;
+
+
+        })();
+    });
+    </script>
+    
+    <!-- IC Trainer Kit HTML -->
+     <div class="ic-trainer-body-wrapper">
+         <div class="title">Simulation platform of Full adder</div>
+         <div class="breadboard-container">
+             <svg class="wire-container" id="wire-container-2"></svg>
+             <div class="trainer-section">
+                 <div class="section-title">LED Outputs</div>
+                 <div class="led-section">
+                     <div class="led-unit"><div class="led" id="led-1" data-led="1"></div><div class="connection-terminal led-terminal" data-terminal="led-1"></div><div class="led-label">LED1</div></div>
+                     <div class="led-unit"><div class="led" id="led-2" data-led="2"></div><div class="connection-terminal led-terminal" data-terminal="led-2"></div><div class="led-label">LED2</div></div>
+                     <div class="led-unit"><div class="led" id="led-3" data-led="3"></div><div class="connection-terminal led-terminal" data-terminal="led-3"></div><div class="led-label">LED3</div></div>
+                     <div class="led-unit"><div class="led" id="led-4" data-led="4"></div><div class="connection-terminal led-terminal" data-terminal="led-4"></div><div class="led-label">LED4</div></div>
+                     <div class="led-unit"><div class="led" id="led-5" data-led="5"></div><div class="connection-terminal led-terminal" data-terminal="led-5"></div><div class="led-label">LED5</div></div>
+                     <div class="led-unit"><div class="led" id="led-6" data-led="6"></div><div class="connection-terminal led-terminal" data-terminal="led-6"></div><div class="led-label">LED6</div></div>
+                     <div class="led-unit"><div class="led" id="led-7" data-led="7"></div><div class="connection-terminal led-terminal" data-terminal="led-7"></div><div class="led-label">LED7</div></div>
+                 </div>
+             </div>
+             <div class="trainer-section">
+                 <div class="section-title">Power Supply</div>
+                 <div class="power-section">
+                     <div class="power-unit"><div class="power-terminal vcc-terminal" data-terminal="vcc">+5V</div><div class="connection-terminal power-terminal-point" data-terminal="vcc-out"></div><div class="power-label">VCC</div></div>
+                     <div class="power-unit"><div class="power-terminal gnd-terminal" data-terminal="gnd">0V</div><div class="connection-terminal power-terminal-point" data-terminal="gnd-out"></div><div class="power-label">GND</div></div>
+                 </div>
+             </div>
+             <div class="power-indicators">
+                 <div class="power-indicator"><div class="power-dot positive-dot"></div><span>+ Power Rail</span></div>
+                 <div class="power-indicator"><div class="power-dot negative-dot"></div><span>- Power Rail</span></div>
+             </div>
+             <div class="breadboard" id="breadboard">
+                 <div class="power-rails" id="power-rails-top"></div>
+                 <div class="column-labels" id="column-labels"></div>
+                 <div class="main-grid" id="main-grid-top"><div class="row-labels"><div>a</div><div>b</div><div>c</div><div>d</div><div>e</div></div></div>
+                 <div class="divider"></div>
+                 <div class="main-grid" id="main-grid-bottom"><div class="row-labels"><div>f</div><div>g</div><div>h</div><div>i</div><div>j</div></div></div>
+                 <div class="power-rails" id="power-rails-bottom"></div>
+             </div>
+             <div class="trainer-section" style="margin-top: 15px;">
+                 <div class="section-title">Input Switches</div>
+                 <div class="switch-section">
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-1"></div><div class="toggle-switch" id="switch-1" data-switch="1"><div class="toggle-slider"></div></div><div class="switch-label">SW1</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-2"></div><div class="toggle-switch" id="switch-2" data-switch="2"><div class="toggle-slider"></div></div><div class="switch-label">SW2</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-3"></div><div class="toggle-switch" id="switch-3" data-switch="3"><div class="toggle-slider"></div></div><div class="switch-label">SW3</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-4"></div><div class="toggle-switch" id="switch-4" data-switch="4"><div class="toggle-slider"></div></div><div class="switch-label">SW4</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-5"></div><div class="toggle-switch" id="switch-5" data-switch="5"><div class="toggle-slider"></div></div><div class="switch-label">SW5</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-6"></div><div class="toggle-switch" id="switch-6" data-switch="6"><div class="toggle-slider"></div></div><div class="switch-label">SW6</div></div>
+                     <div class="switch-unit"><div class="connection-terminal switch-terminal" data-terminal="switch-7"></div><div class="toggle-switch" id="switch-7" data-switch="7"><div class="toggle-slider"></div></div><div class="switch-label">SW7</div></div>
+                 </div>
+             </div>
+             <div class="controls">
+                 <button class="btn" onclick="clearConnections()">Clear All</button>
+                 <button class="btn" onclick="showConnections()">Show Connections</button>
+                 <button class="btn" onclick="resetAll()">Reset All</button>
+                 <button class="btn" onclick="clearWires()">Clear Wires</button>
+             </div>
+             <div class="status" id="status-2">
+                 Digital IC Trainer Kit Ready. Connect components using terminals and tie-points.
+             </div>
+         </div>
+     </div>
+    
+    <!-- IC Trainer Kit Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            (() => {
+                 class DigitalTrainerKit {
+                     constructor() {
+                         this.connections = new Map();
+                         this.selectedPoint = null;
+                         this.ics = [];
+                         this.icCounter = 0;
+                         this.switchStates = new Array(8).fill(false);
+                         this.ledStates = new Array(8).fill(false);
+                         this.wires = [];
+                         this.wireId = 0;
+                         this.nodeStates = new Map();
+
+                         this.IC_DEFINITIONS = {
+                            '74LS08': { // Quad 2-input AND
+                                type: 'AND', gndPin: 7, vccPin: 14,
+                                gates: [
+                                    { inputs: [1, 2], output: 3 }, { inputs: [4, 5], output: 6 },
+                                    { inputs: [9, 10], output: 8 }, { inputs: [12, 13], output: 11 }
+                                ]
+                            },
+                            '74LS32': { // Quad 2-input OR
+                                type: 'OR', gndPin: 7, vccPin: 14,
+                                gates: [
+                                    { inputs: [1, 2], output: 3 }, { inputs: [4, 5], output: 6 },
+                                    { inputs: [9, 10], output: 8 }, { inputs: [12, 13], output: 11 }
+                                ]
+                            },
+                            '74LS86': { // Quad 2-input XOR
+                                type: 'XOR', gndPin: 7, vccPin: 14,
+                                gates: [
+                                    { inputs: [1, 2], output: 3 }, { inputs: [4, 5], output: 6 },
+                                    { inputs: [9, 10], output: 8 }, { inputs: [12, 13], output: 11 }
+                                ]
+                            }
+                        };
+                         
+                         this.COL_PITCH = 14;
+                         this.BREADBOARD_PADDING = 15;
+                         this.IC_HEIGHT = 28;
+
+                         this.init();
+                     }
+
+                     init() {
+                         this.createBreadboard();
+                         this.setupInternalConnections();
+                         this.setupEventListeners();
+                         this.placeDefaultICs();
+                         this.setupTrainerComponents();
+                         this.runSimulation();
+                     }
+                    
+                     // ... (rest of the DigitalTrainerKit methods: setupTrainerComponents, handleTerminalClick, etc. - omitted for brevity) ...
+                     // Include all methods from the previous version here
+                      setupTrainerComponents() {
+                         document.querySelectorAll('.switch-unit .toggle-switch').forEach(switchEl => {
+                             switchEl.addEventListener('click', (e) => this.toggleSwitch(parseInt(e.currentTarget.dataset.switch)));
+                         });
+                         document.querySelectorAll('.connection-terminal').forEach(terminal => {
+                             terminal.addEventListener('click', (e) => this.handleTerminalClick(e.target));
+                         });
+                     }
+
+                     handleTerminalClick(terminal) {
+                         const terminalId = terminal.dataset.terminal;
+                         if (this.selectedPoint === null) {
+                             this.selectedPoint = terminalId;
+                             terminal.classList.add('selected');
+                             this.updateStatus(`Selected ${terminalId}.`);
+                         } else if (this.selectedPoint === terminalId) {
+                             this.clearSelection();
+                             this.updateStatus('Connection cancelled.');
+                         } else {
+                             this.createWireConnection(this.selectedPoint, terminalId);
+                             this.clearSelection();
+                         }
+                     }
+
+                     createWireConnection(point1, point2) {
+                         if (!this.connections.has(point1)) this.connections.set(point1, new Set());
+                         if (!this.connections.has(point2)) this.connections.set(point2, new Set());
+                         this.connections.get(point1).add(point2);
+                         this.connections.get(point2).add(point1);
+                         
+                         this.drawWire(point1, point2);
+                         
+                         const el1 = this.getElementForPoint(point1);
+                         const el2 = this.getElementForPoint(point2);
+                         if (el1) el1.classList.add('connected');
+                         if (el2) el2.classList.add('connected');
+                         
+                         this.updateStatus(`Connected: ${point1} ↔ ${point2}`);
+                         this.runSimulation();
+                     }
+
+                     getElementForPoint(pointId) {
+                         const wrapper = document.querySelector('.ic-trainer-body-wrapper');
+                         if (!wrapper) return document.getElementById(pointId); 
+
+                         const terminalEl = wrapper.querySelector(`[data-terminal="${pointId}"]`);
+                         if (terminalEl) return terminalEl;
+                         
+                         const tiePointEl = wrapper.querySelector(`#${pointId}`);
+                         if (tiePointEl) return tiePointEl;
+                         
+                         return null;
+                     }
+
+                     drawWire(point1, point2) {
+                         const pos1 = this.getTerminalPosition(point1);
+                         const pos2 = this.getTerminalPosition(point2);
+                         if (!pos1 || !pos2) return;
+
+                         const wireId = `wire-${this.wireId++}`;
+                         const svg = document.getElementById('wire-container-2');
+                         const midX = (pos1.x + pos2.x) / 2;
+                         const pathData = `M ${pos1.x} ${pos1.y} Q ${midX} ${pos1.y} ${midX} ${(pos1.y + pos2.y) / 2} Q ${midX} ${pos2.y} ${pos2.x} ${pos2.y}`;
+                         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                         path.setAttribute('d', pathData);
+                         path.setAttribute('class', 'wire-path');
+                         path.setAttribute('id', wireId);
+                         
+                         if (point1.includes('vcc') || point2.includes('vcc')) path.classList.add('vcc-wire');
+                         else if (point1.includes('gnd') || point2.includes('gnd')) path.classList.add('gnd-wire');
+                         
+                         if (svg) svg.appendChild(path);
+                         this.wires.push({ id: wireId, point1, point2, element: path });
+                     }
+
+                     getTerminalPosition(pointId) {
+                         const element = this.getElementForPoint(pointId);
+                         if (!element) return null;
+                         const container = document.querySelector('.breadboard-container');
+                         if (!container) return null;
+                         const containerRect = container.getBoundingClientRect();
+                         const elementRect = element.getBoundingClientRect();
+                         return {
+                             x: elementRect.left - containerRect.left + elementRect.width / 2,
+                             y: elementRect.top - containerRect.top + elementRect.height / 2
+                         };
+                     }
+                     
+                     setLedState(ledNum, isOn) {
+                         const ledElements = document.querySelectorAll(`.led-unit #led-${ledNum}`);
+                         if (ledElements.length > 0) { 
+                             const ledEl = ledElements[0];
+                             this.ledStates[ledNum - 1] = isOn;
+                             ledEl.classList.toggle('on', isOn);
+                         }
+                     }
+
+                     toggleSwitch(switchNum) {
+                         const switchElements = document.querySelectorAll(`.switch-unit #switch-${switchNum}`);
+                         if (switchElements.length > 0) {
+                             const switchEl = switchElements[0];
+                             this.switchStates[switchNum - 1] = !this.switchStates[switchNum - 1];
+                             if(switchEl) {
+                                 switchEl.classList.toggle('on', this.switchStates[switchNum - 1]);
+                             }
+                             this.updateStatus(`Switch ${switchNum} is ${this.switchStates[switchNum - 1] ? 'ON' : 'OFF'}`);
+                             this.runSimulation();
+                         }
+                     }
+
+                     placeDefaultICs() {
+                         this.addICAtPosition('74LS86', 15); // XOR
+                         this.addICAtPosition('74LS08', 28); // AND
+                         this.addICAtPosition('74LS32', 41); // OR
+                     }
+
+                     addICAtPosition(partNumber, column) {
+                         const icId = `ic-${this.icCounter++}`;
+                         const breadboard = document.getElementById('breadboard');
+                         if (!breadboard) return;
+                         const ic = document.createElement('div');
+                         ic.className = 'ic-component';
+                         ic.id = icId;
+                         const icLabel = document.createElement('div');
+                         icLabel.className = 'ic-label';
+                         icLabel.textContent = partNumber;
+                         ic.appendChild(icLabel);
+                         const notch = document.createElement('div');
+                         notch.className = 'ic-notch';
+                         ic.appendChild(notch);
+                         const pinsContainer = document.createElement('div');
+                         pinsContainer.className = 'ic-pins-visual';
+                         const pinSpacing = 14;
+                         for (let i = 0; i < 7; i++) {
+                             const pinLeftOffset = 4;
+                             const pinLeft = pinLeftOffset + (i * pinSpacing);
+                             const topPin = document.createElement('div');
+                             topPin.className = 'ic-pin-visual top';
+                             topPin.style.left = pinLeft + 'px';
+                             pinsContainer.appendChild(topPin);
+                             const bottomPin = document.createElement('div');
+                             bottomPin.className = 'ic-pin-visual bottom';
+                             bottomPin.style.left = pinLeft + 'px';
+                             pinsContainer.appendChild(bottomPin);
+                             const topPinNum = 14 - i;
+                             const bottomPinNum = 1 + i;
+                             const labelLeft = (pinLeft + 2) + 'px';
+                             const topRowLabel = document.createElement('div');
+                             topRowLabel.className = 'ic-pin-label pin-label-top-row';
+                             topRowLabel.textContent = topPinNum;
+                             topRowLabel.style.left = labelLeft;
+                             ic.appendChild(topRowLabel);
+                             const bottomRowLabel = document.createElement('div');
+                             bottomRowLabel.className = 'ic-pin-label pin-label-bottom-row';
+                             bottomRowLabel.textContent = bottomPinNum;
+                             bottomRowLabel.style.left = labelLeft;
+                             ic.appendChild(bottomRowLabel);
+                         }
+                         ic.appendChild(pinsContainer);
+                         const divider = breadboard.querySelector('.divider');
+                         if (!divider) return;
+                         
+                         const middleOfDivider = divider.offsetTop + (divider.offsetHeight / 2);
+                         ic.style.top = middleOfDivider + 'px';
+                         ic.style.left = (this.BREADBOARD_PADDING + (column - 1) * this.COL_PITCH) + 'px';
+                         breadboard.appendChild(ic);
+                         const icInfo = { id: icId, partNumber, element: ic, column };
+                         this.ics.push(icInfo);
+                         this.autoConnectIC(icInfo);
+                     }
+                     
+                     setupInternalConnections() {
+                         this.connectPowerRails('top');
+                         this.connectPowerRails('bottom');
+                         for (let col = 1; col <= 60; col++) {
+                             this.connectGroup(['a','b','c','d','e'].map(r => `${r}-${col}`));
+                             this.connectGroup(['f','g','h','i','j'].map(r => `${r}-${col}`));
+                         }
+                     }
+                     
+                     connectPowerRails(position) {
+                         const posGroup = Array.from({length: 60}, (_, i) => `power-pos-${position}-${i}`);
+                         this.connectGroup(posGroup);
+                         const negGroup = Array.from({length: 60}, (_, i) => `power-neg-${position}-${i}`);
+                         this.connectGroup(negGroup);
+                     }
+
+                     createBreadboard() {
+                         const columnLabels = document.getElementById('column-labels');
+                         if (!columnLabels) return;
+                         columnLabels.innerHTML = '';
+                         for (let i = 1; i <= 60; i++) {
+                             const label = document.createElement('div');
+                             if (i % 5 === 0) label.textContent = i;
+                             columnLabels.appendChild(label);
+                         }
+                         this.createPowerRails('power-rails-top', 'top');
+                         this.createPowerRails('power-rails-bottom', 'bottom');
+                         this.createMainGrid('main-grid-top', 'top');
+                         this.createMainGrid('main-grid-bottom', 'bottom');
+                     }
+                     
+                     createPowerRails(containerId, pos) {
+                         const c = document.getElementById(containerId);
+                         if (!c) return;
+                         c.innerHTML = '';
+                         for (let i = 0; i < 60; i++) c.appendChild(this.createTiePoint(`power-pos-${pos}-${i}`, 'power-positive'));
+                         for (let i = 0; i < 60; i++) c.appendChild(this.createTiePoint(`power-neg-${pos}-${i}`, 'power-negative'));
+                     }
+
+                     createMainGrid(containerId, section) {
+                         const c = document.getElementById(containerId);
+                         if (!c) return;
+                         c.innerHTML = '';
+                         const rows = section === 'top' ? ['a','b','c','d','e'] : ['f','g','h','i','j'];
+                         const rowLabels = document.createElement('div');
+                         rowLabels.className = 'row-labels';
+                         rowLabels.innerHTML = rows.map(r => `<div>${r}</div>`).join('');
+                         c.appendChild(rowLabels);
+                         rows.forEach(row => {
+                             for (let col = 1; col <= 60; col++) c.appendChild(this.createTiePoint(`${row}-${col}`));
+                         });
+                     }
+
+                     createTiePoint(id, extraClass = '') {
+                         const point = document.createElement('div');
+                         point.className = `tie-point ${extraClass}`;
+                         point.id = id;
+                         point.dataset.id = id;
+                         return point;
+                     }
+
+                     connectGroup(pointIds) {
+                         pointIds.forEach(pointId => {
+                             if (!this.connections.has(pointId)) this.connections.set(pointId, new Set());
+                             pointIds.forEach(otherId => { if (pointId !== otherId) this.connections.get(pointId).add(otherId); });
+                         });
+                     }
+
+                     setupEventListeners() {
+                         const breadboard = document.getElementById('breadboard');
+                         if (breadboard) {
+                             breadboard.addEventListener('click', (e) => {
+                                 if (e.target.classList.contains('tie-point')) this.handleTiePointClick(e.target);
+                             });
+                         }
+                     }
+
+                     handleTiePointClick(point) {
+                         const pointId = point.dataset.id;
+                         if (this.selectedPoint === null) {
+                             this.selectedPoint = pointId;
+                             point.classList.add('selected');
+                             this.updateStatus(`Selected ${pointId}.`);
+                         } else if (this.selectedPoint === pointId) {
+                             this.clearSelection();
+                             this.updateStatus('Connection cancelled.');
+                         } else {
+                             this.createWireConnection(this.selectedPoint, pointId);
+                             this.clearSelection();
+                         }
+                     }
+
+                     clearSelection() {
+                         if (this.selectedPoint) {
+                             const element = this.getElementForPoint(this.selectedPoint);
+                             if (element) element.classList.remove('selected');
+                         }
+                         this.selectedPoint = null;
+                     }
+                     
+                     updateStatus(message) {
+                         const statusEl = document.getElementById('status-2');
+                         if (statusEl) statusEl.textContent = message;
+                     }
+
+                     autoConnectIC(icInfo) {
+                         const startCol = icInfo.column;
+                         for (let i = 0; i < 7; i++) {
+                             const col = startCol + i;
+                             this.createICConnection(`${icInfo.id}-pin${14 - i}`, `e-${col}`);
+                             this.createICConnection(`${icInfo.id}-pin${1 + i}`, `f-${col}`);
+                         }
+                     }
+                     
+                     createICConnection(icPin, tiePoint) {
+                         if (!this.connections.has(icPin)) this.connections.set(icPin, new Set());
+                         if (!this.connections.has(tiePoint)) this.connections.set(tiePoint, new Set());
+                         this.connections.get(icPin).add(tiePoint);
+                         this.connections.get(tiePoint).add(icPin);
+                     }
+
+                     clearAllWires() {
+                         this.wires.forEach(wire => wire.element.remove());
+                         this.wires = [];
+                     }
+
+                     getNodeState(pointId) {
+                         return this.nodeStates.get(pointId) ?? null;
+                     }
+
+                     runSimulation() {
+                         const tempNodeStates = new Map();
+
+                         tempNodeStates.set('vcc-out', 1);
+                         tempNodeStates.set('gnd-out', 0);
+                         for (let i = 1; i <= 7; i++) {
+                             tempNodeStates.set(`switch-${i}`, this.switchStates[i - 1] ? 1 : 0);
+                         }
+                         
+                         for (let i = 0; i < 15; i++) { // Propagation loop
+                             this.connections.forEach((connectedPoints, pointId) => {
+                                 if (tempNodeStates.has(pointId)) {
+                                     const state = tempNodeStates.get(pointId);
+                                     connectedPoints.forEach(p => tempNodeStates.set(p, state));
+                                 }
+                             });
+
+                             this.ics.forEach(ic => {
+                                 const icDef = this.IC_DEFINITIONS[ic.partNumber];
+                                 if (!icDef) return;
+
+                                 const vccPinId = `${ic.id}-pin${icDef.vccPin}`;
+                                 const gndPinId = `${ic.id}-pin${icDef.gndPin}`;
+                                 const isPowered = tempNodeStates.get(vccPinId) === 1 && tempNodeStates.get(gndPinId) === 0;
+
+                                 if (isPowered) {
+                                     icDef.gates.forEach(gate => {
+                                         const inputStates = gate.inputs.map(pinNum => tempNodeStates.get(`${ic.id}-pin${pinNum}`));
+                                         const outputPinId = `${ic.id}-pin${gate.output}`;
+
+                                         if (inputStates.every(s => typeof s === 'number')) {
+                                             let outputState = null;
+                                             if (icDef.type === 'AND') {
+                                                 outputState = inputStates.every(s => s === 1) ? 1 : 0;
+                                             } else if (icDef.type === 'OR') {
+                                                 outputState = inputStates.some(s => s === 1) ? 1 : 0;
+                                             } else if (icDef.type === 'XOR') {
+                                                 outputState = inputStates.reduce((a, b) => a ^ b, 0);
+                                             }
+                                             if (outputState !== null) tempNodeStates.set(outputPinId, outputState);
+                                         }
+                                     });
+                                 }
+                             });
+                         }
+                         this.nodeStates = tempNodeStates;
+                         
+                         for (let i = 1; i <= 7; i++) {
+                             this.setLedState(i, this.getNodeState(`led-${i}`) === 1);
+                         }
+                     }
+                 }
+                 
+                 let trainerKit = new DigitalTrainerKit();
+
+                 // --- FIX: Expose functions globally ---
+                 window.clearConnections = function() {
+                     trainerKit.clearAllWires();
+                     const allPoints = document.querySelectorAll('.breadboard-container .connected, .breadboard-container .selected');
+                     allPoints.forEach(el => el.classList.remove('connected', 'selected'));
+                     
+                     trainerKit.connections.clear();
+                     trainerKit.selectedPoint = null;
+                     
+                     trainerKit.setupInternalConnections();
+                     trainerKit.ics.forEach(ic => trainerKit.autoConnectIC(ic));
+                     trainerKit.runSimulation();
+                     trainerKit.updateStatus('All connections and wires cleared.');
+                 }
+
+                 window.clearWires = function() {
+                     window.clearConnections(); // Call the globally exposed clearConnections
+                 }
+
+                 window.showConnections = function() {
+                     const userConnections = new Set(trainerKit.wires.map(w => [w.point1, w.point2].sort().join(' ↔ ')));
+                     const connectionArray = Array.from(userConnections);
+                     if (connectionArray.length === 0) {
+                         trainerKit.updateStatus('No user-made connections found.');
+                     } else {
+                         trainerKit.updateStatus(`Connections: ${connectionArray.join(', ')}`);
+                     }
+                 }
+
+                 window.resetAll = function() {
+                     document.querySelectorAll('.switch-unit .toggle-switch.on').forEach(el => el.classList.remove('on'));
+                     trainerKit.switchStates.fill(false);
+                     window.clearConnections(); // Call the globally exposed clearConnections
+                     trainerKit.runSimulation();
+                     trainerKit.updateStatus('All components and connections reset.');
+                 }
+            })();
+        });
+    </script>
+</body>
+</html>
+
